@@ -36,6 +36,15 @@ const posts = [
 const hrl = function (request, response) {
     const { url, method } = request;
 
+    if (method === 'GET') {
+        if (url === '/go') {
+            response.writeHead(200, {
+                'Content-Type': 'application/json',
+            });
+            response.end(JSON.stringify({ message: 'users' }));
+        }
+    }
+
     if (method === 'POST') {
         if (url === '/users/signup') {
             let body = '';
@@ -49,7 +58,7 @@ const hrl = function (request, response) {
 
                 if (!users.some((e) => e.email === user.email)) {
                     users.push({
-                        id: user.id,
+                        id: users.length + 1,
                         name: user.name,
                         email: user.email,
                         password: user.password,
@@ -64,6 +73,29 @@ const hrl = function (request, response) {
                 }
 
                 response.end(JSON.stringify({ users: users }));
+            });
+        }
+        if (url === '/posts') {
+            let body = '';
+
+            request.on('data', (data) => {
+                body += data;
+            });
+
+            request.on('end', () => {
+                const post = JSON.parse(body);
+
+                posts.push({
+                    id: post.id,
+                    title: post.title,
+                    content: post.content,
+                    userId: post.userId,
+                });
+                response.writeHead(200, {
+                    'Content-Type': 'application/json',
+                });
+
+                response.end(JSON.stringify({ posts: posts }));
             });
         }
     }
