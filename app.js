@@ -43,6 +43,33 @@ const hrl = function (request, response) {
         }
     }
 
+    if (method === 'PATCH') {
+        if (url === '/posts') {
+            let body = '';
+
+            request.on('data', (data) => {
+                body += data;
+            });
+
+            request.on('end', () => {
+                const patchedPost = JSON.parse(body);
+                if (posts[patchedPost.id - 1].userId === patchedPost.userId) {
+                    posts[patchedPost.id - 1].title = patchedPost.title;
+                    posts[patchedPost.id - 1].content = patchedPost.content;
+
+                    response.writeHead(200, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ posts: posts }));
+                } else {
+                    response.writeHead(409, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ posts: posts }));
+                }
+            });
+        }
+    }
     if (method === 'POST') {
         if (url === '/users/signup') {
             let body = '';
@@ -84,7 +111,7 @@ const hrl = function (request, response) {
                 const post = JSON.parse(body);
 
                 posts.push({
-                    id: post.id,
+                    id: posts.length + 1,
                     title: post.title,
                     content: post.content,
                     userId: post.userId,
