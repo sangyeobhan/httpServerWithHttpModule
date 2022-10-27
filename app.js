@@ -37,11 +37,9 @@ const hrl = function (request, response) {
     const { url, method } = request;
 
     if (method === 'GET') {
-        if (url === '/go') {
-            response.writeHead(200, {
-                'Content-Type': 'application/json',
-            });
-            response.end(JSON.stringify({ message: 'users' }));
+        if (url === '/posts') {
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ posts: posts }));
         }
     }
 
