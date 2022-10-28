@@ -59,6 +59,42 @@ const hrl = function (request, response) {
             response.writeHead(200, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify({ posts: posts }));
         }
+        if (url === '/users/posts') {
+            let body = '';
+
+            request.on('data', (data) => {
+                body += data;
+            });
+
+            request.on('end', () => {
+                const userInfo = JSON.parse(body);
+                if (
+                    userInfo.userId <= users.length &&
+                    userInfo.userName === users[userInfo.userId - 1].name
+                ) {
+                    const obj = {
+                        userId: userInfo.userId,
+                        userName: userInfo.userName,
+                        postings: [],
+                    };
+                    for (let i of posts) {
+                        if (i.userId === userInfo.userId) {
+                            obj.postings.push(i);
+                        }
+                    }
+
+                    response.writeHead(200, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ data: obj }));
+                } else {
+                    response.writeHead(200, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ data: 'invalid info' }));
+                }
+            });
+        }
     }
 
     if (method === 'PATCH') {
@@ -72,7 +108,7 @@ const hrl = function (request, response) {
             request.on('end', () => {
                 const patchedPost = JSON.parse(body);
                 if (patchedPost.id > posts.length) {
-                    response.writeHead(409, {
+                    response.writeHead(422, {
                         'Content-Type': 'application/json',
                     });
                     response.end(JSON.stringify({ posts: posts }));
@@ -87,7 +123,7 @@ const hrl = function (request, response) {
                     });
                     response.end(JSON.stringify({ posts: posts }));
                 } else {
-                    response.writeHead(409, {
+                    response.writeHead(422, {
                         'Content-Type': 'application/json',
                     });
                     response.end(JSON.stringify({ posts: posts }));
@@ -107,7 +143,7 @@ const hrl = function (request, response) {
             request.on('end', () => {
                 const willDelete = JSON.parse(body);
                 if (willDelete.id > posts.length) {
-                    response.writeHead(409, {
+                    response.writeHead(422, {
                         'Content-Type': 'application/json',
                     });
                     response.end(JSON.stringify({ posts: posts }));
@@ -125,7 +161,7 @@ const hrl = function (request, response) {
                     });
                     response.end(JSON.stringify({ posts: posts }));
                 } else {
-                    response.writeHead(409, {
+                    response.writeHead(422, {
                         'Content-Type': 'application/json',
                     });
                     response.end(JSON.stringify({ posts: posts }));
@@ -156,7 +192,7 @@ const hrl = function (request, response) {
                         'Content-Type': 'application/json',
                     });
                 } else {
-                    response.writeHead(409, {
+                    response.writeHead(422, {
                         'Content-Type': 'application/json',
                     });
                 }
