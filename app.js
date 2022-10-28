@@ -15,6 +15,12 @@ const users = [
         email: 'Connell29@gmail.com',
         password: 'password',
     },
+    {
+        id: 3,
+        name: 'bobo',
+        email: 'dsfafe324@gmail.com',
+        password: 'fdsf3222',
+    },
 ];
 
 const posts = [
@@ -29,6 +35,18 @@ const posts = [
         id: 2,
         title: 'HTTP의 특성',
         content: 'Request/Response와 Stateless!!',
+        userId: 1,
+    },
+    {
+        id: 3,
+        title: '해피해피!',
+        content: '캐캐캐캐ㅐ캐.',
+        userId: 2,
+    },
+    {
+        id: 4,
+        title: '배고픈걸?',
+        content: '그치!!',
         userId: 1,
     },
 ];
@@ -53,7 +71,14 @@ const hrl = function (request, response) {
 
             request.on('end', () => {
                 const patchedPost = JSON.parse(body);
-                if (posts[patchedPost.id - 1].userId === patchedPost.userId) {
+                if (patchedPost.id > posts.length) {
+                    response.writeHead(409, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ posts: posts }));
+                } else if (
+                    posts[patchedPost.id - 1].userId === patchedPost.userId
+                ) {
                     posts[patchedPost.id - 1].title = patchedPost.title;
                     posts[patchedPost.id - 1].content = patchedPost.content;
 
@@ -70,6 +95,45 @@ const hrl = function (request, response) {
             });
         }
     }
+
+    if (method === 'DELETE') {
+        if (url === '/posts') {
+            let body = '';
+
+            request.on('data', (data) => {
+                body += data;
+            });
+
+            request.on('end', () => {
+                const willDelete = JSON.parse(body);
+                if (willDelete.id > posts.length) {
+                    response.writeHead(409, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ posts: posts }));
+                } else if (
+                    posts[willDelete.id - 1].userId === willDelete.userId &&
+                    posts[willDelete.id - 1].title === willDelete.title &&
+                    posts[willDelete.id - 1].content === willDelete.content
+                ) {
+                    posts.splice(willDelete.id - 1, 1);
+                    for (let i = willDelete.id - 1; i < posts.length; i++) {
+                        posts[i]['id'] = i + 1;
+                    }
+                    response.writeHead(200, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ posts: posts }));
+                } else {
+                    response.writeHead(409, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify({ posts: posts }));
+                }
+            });
+        }
+    }
+
     if (method === 'POST') {
         if (url === '/users/signup') {
             let body = '';
